@@ -1,0 +1,25 @@
+service: sls-db-migration
+
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  lambdaHashingVersion: 20201221
+
+ iamRoleStatements:
+   - Effect: "Allow"
+     Action:
+       - "s3:GetObject"
+     Resource: "arn:aws:s3:::<your-s3-bucket-hosting-migration-files>"
+
+functions:
+  dbmigration:
+    handler: migration.handler.migration_handler
+    memorySize: 256
+    vpc:
+      securityGroupIds:
+        - < security group ids >
+
+      subnetIds:
+        - < subnet id(s) from which the DB can be accessedd>
