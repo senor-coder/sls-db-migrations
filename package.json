@@ -1,0 +1,31 @@
+{
+  "name": "sls-db-miragtions",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Serverless wrapper for node.js db-migrations framework",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/senor-coder/sls-db-miragtions.git"
+  },
+  "keywords": [
+    "db-migrations",
+    "serverless"
+  ],
+  "scripts": {
+    "deploy": "sls deploy"
+  },
+  "author": "Ashwin Surana",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/senor-coder/sls-db-miragtions/issues"
+  },
+  "homepage": "https://github.com/senor-coder/sls-db-miragtions#readme",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.22.0",
+    "db-migrate": "^0.11.12",
+    "node-stream-zip": "^1.13.6"
+  },
+  "devDependencies": {
+    "serverless": "^2.52.0"
+  }
+}
