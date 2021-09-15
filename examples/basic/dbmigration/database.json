@@ -1,0 +1,12 @@
+{
+  "prod": {
+    "driver": "mysql",
+    "user": "admin",
+    "password": "abcd",
+    "host": "localhost",
+    "database": "sandbox",
+    "port": 3307,
+    "multipleStatements": true
+  },
+  "sql-file": true
+}

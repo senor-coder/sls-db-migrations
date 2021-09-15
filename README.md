@@ -22,3 +22,19 @@ To deploy the project
 ```bash
 npm run deploy
 ```
+
+## Zip Archive Structure
+
+The ZIP file stored in S3 should have the migrations folder and the configuration JSON at the root level
+Example:
+
+```bash
+$ zip -sf migrations.zip 
+Archive contains:
+  database.json
+  migrations/
+```
+
+## Examples
+
+A complete example can be found in the  [examples/basic](./examples/basic) directory.
