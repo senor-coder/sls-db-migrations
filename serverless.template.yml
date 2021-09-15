@@ -15,7 +15,7 @@ provider:
 
 functions:
   dbmigration:
-    handler: migration.handler.migration_handler
+    handler: migration.handler.s3MigrationHandler
     memorySize: 256
     vpc:
       securityGroupIds:
