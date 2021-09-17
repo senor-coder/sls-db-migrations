@@ -15,7 +15,7 @@
     "deploy": "sls deploy"
   },
   "bin": {
-    "s3migrate": "./bin/s3migrate.js"
+    "sls-dbmigrate": "./bin/sls-dbmigrate.js"
   },
   "author": "Ashwin Surana",
   "license": "MIT",

@@ -13,7 +13,7 @@ const { S3Client, GetObjectCommand } = clientS3Package;
  * A class that takes care of executing migrations stored as an
  * archive(.zip) files in AWS S3
  */
-export class S3DBMigrator {
+export class ServerlessDBMigrator {
     /**
      * 
      * @param {S3Client} s3Client 

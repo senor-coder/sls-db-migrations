@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#! /usr/bin/env node
 
 import { Command } from 'commander/esm.mjs';
 import pkg from '@aws-sdk/client-lambda';
