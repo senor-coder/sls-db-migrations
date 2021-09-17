@@ -19,7 +19,7 @@ const errorResponse = (error) => {
 }
 
 export async function serverlessMigrationHandler(event) {
-  const { bucket, archivePath, command, options } = event;
+  const { bucket, archivePath, command, configOptions, commandOptions } = event;
 
   console.log('Received payload:', event)
   const s3Client = new S3Client();
@@ -27,7 +27,7 @@ export async function serverlessMigrationHandler(event) {
   const slsDbMigrator = new ServerlessDBMigrator(s3Client, baseDbMigrationClient)
 
   try{
-    await slsDbMigrator.executeCommand(bucket, archivePath, command, options)
+    await slsDbMigrator.executeCommand(bucket, archivePath, command, configOptions, commandOptions)
     return successResponse()
   } catch (e) {
     console.error(`Error running command "${command}" for from bucket: ${bucket}, path: ${archivePath}`)

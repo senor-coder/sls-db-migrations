@@ -61,7 +61,7 @@ export class ServerlessDBMigrator {
     }
 
 
-    async executeCommand(bucket, archivePath, command, options) {
+    async executeCommand(bucket, archivePath, command, configOptions, commandOptions) {
         const targetDir = fs.mkdtempSync(path.join(os.tmpdir(), 'migrations-'));
 
         console.log(`Download file from S3 (Bucket: ${bucket}, archivePath: ${archivePath})`);
@@ -76,7 +76,7 @@ export class ServerlessDBMigrator {
         await this.baseDbMigrationClient.createDB(targetDir);
 
         console.log(`Executing Command ${command}`);
-        return this.baseDbMigrationClient.commandMap[command](targetDir, options)
+        return this.baseDbMigrationClient.commandMap[command](targetDir, configOptions, commandOptions)
     }
 
 }
