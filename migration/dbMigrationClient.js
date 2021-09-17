@@ -18,7 +18,7 @@ export class BaseDBMigrationClient {
     }
 
     async createDB(migrationsDir, { configPath, env } = {}) {
-        let dbmigrateOptions = {};
+        let dbmigrateOptions = { throwUncatched: true };
         dbmigrateOptions['cwd'] = migrationsDir;
 
         configPath = configPath ? configPath : 'database.json'
@@ -43,7 +43,7 @@ export class BaseDBMigrationClient {
     }
 
     async executeUp(migrationsDir, { configPath, env, countOrSpecification, scope }) {
-        let dbmigrateOptions = {};
+        let dbmigrateOptions = { throwUncatched: true };
         dbmigrateOptions['cwd'] = migrationsDir;
 
         if (configPath) {
@@ -59,7 +59,7 @@ export class BaseDBMigrationClient {
     }
 
     async executeReset(migrationsDir, { configPath, env, scope }) {
-        let dbmigrateOptions = {};
+        let dbmigrateOptions = { throwUncatched: true };
         dbmigrateOptions['cwd'] = migrationsDir;
 
         if (configPath) {
@@ -73,7 +73,7 @@ export class BaseDBMigrationClient {
         return dbMigrateInstance.reset(scope);
     }
     async executeDown(migrationsDir, { configPath, env, countOrSpecification, scope }) {
-        let dbmigrateOptions = {};
+        let dbmigrateOptions = { throwUncatched: true };
         dbmigrateOptions['cwd'] = migrationsDir;
 
         if (configPath) {

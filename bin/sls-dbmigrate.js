@@ -23,7 +23,20 @@ const invokeLambda = async (lambdaNameOrArn, payload) => {
         }))
 }
 
-
+const handleLambdaResponse = async (invokeCommandOutput) => {
+    const payload = JSON.parse(Buffer.from(data.Payload));
+    if (invokeCommandOutput.StatusCode < 300 ) {
+        console.log('Successfully invoked lambda...');
+    } else {
+        console.log('Error executing lambda...');
+    }
+    if (!payload.success) {
+        console.log('Error executing the command');
+    }
+    console.log('Latest Lambda logs:')
+    const lambdaFunctionLog = Buffer.from(invokeCommandOutput.LogResult, 'base64')
+    console.log(lambdaFunctionLog)
+}
 
 // --- CLI ---
 
@@ -48,7 +61,8 @@ const up = program.command('up')
         const { bucket, archivePath, configPath, lambda } = options;
         const payload = constructMigrationPayload("up", bucket, archivePath, configPath, env, countOrSpecification)
 
-        invokeLambda(lambda, payload).then((result) => {
+        invokeLambda(lambda, payload).then((invokeCommandOutput) => {
+            handleLambdaResponse(invokeCommandOutput)
             console.log('Done')
         })
     }) 
@@ -64,7 +78,9 @@ const down = program.command('down')
         const { bucket, archivePath, configPath, lambda } = options;
         const payload = constructMigrationPayload("down", bucket, archivePath, configPath, env, countOrSpecification)
 
-        invokeLambda(lambda, payload).then((result) => {
+        invokeLambda(lambda, payload).then((invokeCommandOutput) => {
+            handleLambdaResponse(invokeCommandOutput)
+
             console.log('Done')
         })
     }) 
