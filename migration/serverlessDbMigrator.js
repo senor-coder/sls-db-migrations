@@ -21,7 +21,6 @@ class ServerlessDBMigrator {
     constructor(s3Client, baseDbMigrationClient) {
         this.s3Client = s3Client;
         this.baseDbMigrationClient = baseDbMigrationClient
-        this.commandMap = baseDbMigrationClient.commandMap
     }
 
     async downloadArchive(bucket, archivePath, targetDir) {
@@ -53,7 +52,6 @@ class ServerlessDBMigrator {
         const downloadedFile = await this.downloadArchive(bucket, archivePath, targetDir);
         console.log(`Downloaded File to: ${downloadedFile}`);
         console.log(`Extracting zip File to: ${targetDir}`);
-        await new Promise((resolve) => { setTimeout(resolve, 2000); })
         await this.extractArchive(downloadedFile, targetDir);
         console.log(`Zip file extracted.`);
         return targetDir;
@@ -68,14 +66,13 @@ class ServerlessDBMigrator {
         console.log(`Downloaded File to: ${downloadedFile}`);
 
         console.log(`Extracting zip File to: ${targetDir}`);
-        await new Promise((resolve) => { setTimeout(resolve, 2000); })
         await this.extractArchive(downloadedFile, targetDir);
         console.log(`Zip file extracted.`);
 
         await this.baseDbMigrationClient.createDB(targetDir, configOptions);
 
         console.log(`Executing Command ${command}`);
-        return this.baseDbMigrationClient.commandMap[command](targetDir, configOptions, commandOptions)
+        return this.baseDbMigrationClient.commandMapper(command, targetDir, configOptions, commandOptions)
     }
 
 }

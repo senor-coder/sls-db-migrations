@@ -11,14 +11,23 @@ const path = require("path");
  */
 class BaseDBMigrationClient {
     constructor() {
-        this.commandMap = {
-            up: this.executeUp,
-            down: this.executeDown,
-            reset: this.executeReset
+        
+    }
+
+    commandMapper(command, workingDirectory, configOptions, commandOptions) {
+        switch (command) {
+            case "up":
+                return this.executeUp(workingDirectory, configOptions, commandOptions);
+            case "down":
+                return this.executeDown(workingDirectory, configOptions, commandOptions);
+            case "reset":
+                return this.executeReset(workingDirectory, configOptions, commandOptions);
+
+            default:
+                throw Error(`Unknown command ${command}`)
         }
     }
 
-   
     /**
      * Returns a DBMigrate instance with the given paramaters
      * @param {string} workingDirectory the working directory for the db-migrate
