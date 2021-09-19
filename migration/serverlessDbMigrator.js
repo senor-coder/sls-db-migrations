@@ -72,7 +72,7 @@ class ServerlessDBMigrator {
         await this.extractArchive(downloadedFile, targetDir);
         console.log(`Zip file extracted.`);
 
-        await this.baseDbMigrationClient.createDB(targetDir);
+        await this.baseDbMigrationClient.createDB(targetDir, configOptions);
 
         console.log(`Executing Command ${command}`);
         return this.baseDbMigrationClient.commandMap[command](targetDir, configOptions, commandOptions)

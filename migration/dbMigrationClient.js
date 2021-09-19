@@ -64,7 +64,7 @@ class BaseDBMigrationClient {
         const resolvedConfig = this.resolveConfig(migrationsDir, config);
         let datatbaseConfig = {};
 
-        if (typeof(resolvedConfig) == 'string') {
+        if (typeof (resolvedConfig) == 'string') {
             datatbaseConfig = JSON.parse(fs.readFileSync(resolvedConfig, 'utf8'));
         } else {
             datatbaseConfig = config
@@ -75,11 +75,29 @@ class BaseDBMigrationClient {
         if (!chosenEnv) {
             throw Error('No environment specified. Send a env key in the options or specify defaultEnv in the config')
         }
+        if (!datatbaseConfig[chosenEnv] || !datatbaseConfig[chosenEnv].database) {
+            throw Error(`The environment ${env} not found in the config`)
+
+        }
         databaseName = datatbaseConfig[chosenEnv].database;
 
+        // This is an issue with db-migrate where it tries to connect to the database
+        // specified in the config even before creating the database.
+        // So as a workaround, we remove that property from the config and set it after the database is created
+        // 
+        // See issue: https://github.com/db-migrate/node-db-migrate/issues/468
+        // Also see: https://github.com/db-migrate/node-db-migrate/pull/644/
+        //      (It seems to be fixed upstream, but is pending release)
+        delete datatbaseConfig[chosenEnv].database
+
         console.log(`Creating database if not exists: ${databaseName}`)
-        const dbMigrateInstance = this.getDbMigrateInstance(migrationsDir, config, env)
-        return dbMigrateInstance.createDatabase(databaseName);
+
+        const dbMigrateInstance = this.getDbMigrateInstance(migrationsDir, datatbaseConfig, env)
+        const result = await dbMigrateInstance.createDatabase(databaseName);
+        
+        // Set back the database property that we removed from the config
+        datatbaseConfig[chosenEnv].database = databaseName
+        return result
     }
 
     async executeUp(migrationsDir, { config, env }, { countOrSpecification, scope }) {
