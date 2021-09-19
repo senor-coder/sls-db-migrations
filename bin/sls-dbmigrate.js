@@ -4,6 +4,9 @@ const { Command, CommanderError } = require('commander')
 const { LambdaClient, InvokeCommand, InvokeCommandInput } = require('@aws-sdk/client-lambda');
 const fs = require('fs');
 
+const LAMBDA_FAILURE_EXIT_CODE = 2;
+
+
 const constructMigrationPayload = (command, bucket, archivePath, config, env, countOrSpecification, scope) => {
     return {
         bucket, archivePath, command,
@@ -26,21 +29,27 @@ const invokeLambda = async (lambdaNameOrArn, payload) => {
 }
 
 const handleLambdaResponse = async (invokeCommandOutput) => {
-    const payload = JSON.parse(Buffer.from(data.Payload));
-    if (invokeCommandOutput.StatusCode < 300) {
-        console.log('Successfully invoked lambda...');
-    } else {
+    const payload = JSON.parse(Buffer.from(invokeCommandOutput.Payload));
+    if (invokeCommandOutput.StatusCode > 300) {
         console.log('Error executing lambda...');
     }
-    if (!payload.success) {
-        console.log('Error executing the command');
+
+    if (invokeCommandOutput.LogResult) {
+        console.log('Latest Lambda logs:')
+        const lambdaFunctionLog = Buffer.from(invokeCommandOutput.LogResult, 'base64')
+        console.log(lambdaFunctionLog)
     }
-    console.log('Latest Lambda logs:')
-    const lambdaFunctionLog = Buffer.from(invokeCommandOutput.LogResult, 'base64')
-    console.log(lambdaFunctionLog)
+    if (!payload.success) {
+        console.log(`Error executing the command: ${payload.message}`);
+        console.log(payload.stack)
+        throw new Error('An errored occurred when executing the command. Check the output above or the lambda logs for info.')
+    } else {
+        console.log('Successfully executed the command');
+    }
 }
 
 // --- CLI ---
+
 
 const readLocalConfigFromPath = (path) => {
 
@@ -65,7 +74,7 @@ const up = program.command('up')
 
 addCommonOptions(up)
 
-    .action((env, countOrSpecification, options, command) => {
+    .action(async (env, countOrSpecification, options, command) => {
         console.log({ options })
         const { bucket, archivePath, configPath, lambda, readLocalConfig } = options;
         let resolvedConfig = configPath;
@@ -80,10 +89,15 @@ addCommonOptions(up)
         }
         const payload = constructMigrationPayload("up", bucket, archivePath, resolvedConfig, env, countOrSpecification)
 
-        invokeLambda(lambda, payload).then((invokeCommandOutput) => {
-            handleLambdaResponse(invokeCommandOutput)
-            console.log('Done')
-        })
+        try {
+            const invokeCommandOutput = await invokeLambda(lambda, payload)
+            await handleLambdaResponse(invokeCommandOutput)
+            console.log('Done.')
+        } catch (e) {
+            console.log(error)
+            process.exitCode = LAMBDA_FAILURE_EXIT_CODE
+            process.exit(LAMBDA_FAILURE_EXIT_CODE)
+        }
     })
 
 const down = program.command('down')
@@ -92,10 +106,11 @@ const down = program.command('down')
 
 addCommonOptions(down)
 
-    .action((env, countOrSpecification, options, command) => {
+    .action(async (env, countOrSpecification, options, command) => {
         console.log({ options })
         const { bucket, archivePath, configPath, lambda, readLocalConfig } = options;
-        
+
+
         let resolvedConfig = configPath;
         if (readLocalConfig) {
             const configObject = readLocalConfigFromPath(configPath)
@@ -105,13 +120,16 @@ addCommonOptions(down)
             resolvedConfig = configObject
         }
         const payload = constructMigrationPayload("down", bucket, archivePath, resolvedConfig, env, countOrSpecification)
-        invokeLambda(lambda, payload).then((invokeCommandOutput) => {
-            handleLambdaResponse(invokeCommandOutput)
-
-            console.log('Done')
-        })
+        try {
+            const invokeCommandOutput = await invokeLambda(lambda, payload)
+            await handleLambdaResponse(invokeCommandOutput)
+            console.log('Done.')
+        } catch (error) {
+            console.log(error)
+            process.exitCode = LAMBDA_FAILURE_EXIT_CODE
+            process.exit(LAMBDA_FAILURE_EXIT_CODE)
+        }
     })
 
 
-
-program.parse(process.argv)
+program.parseAsync(process.argv);
