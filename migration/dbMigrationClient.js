@@ -1,7 +1,7 @@
 
-import DBMigrate from "db-migrate";
-import fs from "fs";
-import path from "path";
+const DBMigrate = require("db-migrate");
+const fs = require("fs");
+const path = require("path");
 
 
 
@@ -9,7 +9,7 @@ import path from "path";
  * A wrapper around the db-migrate library
  * See https://db-migrate.readthedocs.io/en/latest/API/programable/
  */
-export class BaseDBMigrationClient {
+class BaseDBMigrationClient {
     constructor() {
         this.commandMap = {
             up: this.executeUp,
@@ -96,3 +96,5 @@ export class BaseDBMigrationClient {
         return dbMigrateInstance.down(countOrSpecification, scope);
     }
 }
+
+module.exports.BaseDBMigrationClient = BaseDBMigrationClient;

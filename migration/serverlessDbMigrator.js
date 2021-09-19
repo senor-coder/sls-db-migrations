@@ -1,11 +1,10 @@
 
-import StreamZip from "node-stream-zip";
-import fs from "fs";
-import os from "os";
-import path from "path";
-import { BaseDBMigrationClient } from "./dbMigrationClient.js";
-import clientS3Package from '@aws-sdk/client-s3';
-const { S3Client, GetObjectCommand } = clientS3Package;
+const StreamZip = require("node-stream-zip");
+const fs = require( "fs");
+const os = require( "os");
+const path = require( "path");
+const { BaseDBMigrationClient } = require( "./dbMigrationClient.js");
+const { S3Client, GetObjectCommand } = require( '@aws-sdk/client-s3');
 
 
 
@@ -13,7 +12,7 @@ const { S3Client, GetObjectCommand } = clientS3Package;
  * A class that takes care of executing migrations stored as an
  * archive(.zip) files in AWS S3
  */
-export class ServerlessDBMigrator {
+class ServerlessDBMigrator {
     /**
      * 
      * @param {S3Client} s3Client 
@@ -80,3 +79,5 @@ export class ServerlessDBMigrator {
     }
 
 }
+
+module.exports.ServerlessDBMigrator = ServerlessDBMigrator;

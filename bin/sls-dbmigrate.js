@@ -1,9 +1,8 @@
 #! /usr/bin/env node
 
-import { Command } from 'commander/esm.mjs';
-import pkg from '@aws-sdk/client-lambda';
-const { LambdaClient, InvokeCommand, InvokeCommandInput } = pkg;
-import fs from 'fs';
+const { Command, CommanderError } = require('commander')
+const { LambdaClient, InvokeCommand, InvokeCommandInput } = require('@aws-sdk/client-lambda');
+const fs = require('fs');
 
 const constructMigrationPayload = (command, bucket, archivePath, config, env, countOrSpecification, scope) => {
     return {

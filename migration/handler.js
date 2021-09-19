@@ -1,10 +1,8 @@
 "use strict";
+const { S3Client } = require('@aws-sdk/client-s3');
 
-import clientS3Package from '@aws-sdk/client-s3';
-const { S3Client } = clientS3Package;
-
-import { ServerlessDBMigrator } from "./serverlessDbMigrator.js"
-import { BaseDBMigrationClient } from "./dbMigrationClient.js";
+const { ServerlessDBMigrator } = require("./serverlessDbMigrator.js")
+const { BaseDBMigrationClient } = require("./dbMigrationClient.js");
 
 const successResponse = () => {
   return { success: true }
@@ -18,7 +16,7 @@ const errorResponse = (error) => {
   }
 }
 
-export async function serverlessMigrationHandler(event) {
+async function serverlessMigrationHandler(event) {
   const { bucket, archivePath, command, configOptions, commandOptions } = event;
 
   console.log('Received payload:', event)
@@ -36,3 +34,5 @@ export async function serverlessMigrationHandler(event) {
   }
   
 };
+
+module.exports.serverlessMigrationHandler = serverlessMigrationHandler;

@@ -1,7 +1,7 @@
 {
   "name": "sls-db-miragtions",
   "version": "1.0.0",
-  "type": "module",
+  "type": "commonjs",
   "description": "Serverless wrapper for node.js db-migrations framework",
   "repository": {
     "type": "git",
