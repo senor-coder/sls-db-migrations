@@ -1,4 +1,4 @@
-# sls-db-miragtions
+# sls-db-migrations
 Serverless wrapper for node.js db-migrations framework
 
 ## Contents
@@ -19,7 +19,7 @@ The migrations are stored as a ZIP file in AWS S3 and the Lambda uses these to r
 
 1. **Checkout the repository:**
 ```bash
-    git checkout git@github.com:senor-coder/sls-db-miragtions.git
+    git checkout git@github.com:senor-coder/sls-db-migrations.git
 ```
 
 2. **Configure Serverless.yml file:**
