@@ -4,10 +4,10 @@ frameworkVersion: '2'
 
 provider:
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs14.x
   lambdaHashingVersion: 20201221
 
- iamRoleStatements:
+  iamRoleStatements:
    - Effect: "Allow"
      Action:
        - "s3:GetObject"
@@ -15,7 +15,7 @@ provider:
 
 functions:
   dbmigration:
-    handler: migration.handler.migration_handler
+    handler: migration/handler.serverlessMigrationHandler
     memorySize: 256
     vpc:
       securityGroupIds:
