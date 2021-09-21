@@ -104,7 +104,7 @@ addCommonOptions(up)
             await handleLambdaResponse(invokeCommandOutput)
             console.log('Done.')
         } catch (e) {
-            console.log(error)
+            console.log(e)
             process.exitCode = LAMBDA_FAILURE_EXIT_CODE
             process.exit(LAMBDA_FAILURE_EXIT_CODE)
         }
