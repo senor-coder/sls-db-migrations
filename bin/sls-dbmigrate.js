@@ -3,6 +3,10 @@
 const { Command, CommanderError } = require('commander')
 const { LambdaClient, InvokeCommand, InvokeCommandInput } = require('@aws-sdk/client-lambda');
 const fs = require('fs');
+const ConfigResolver = require('../lib/configResolver');
+const { EnvironmentValueResolver } = require('../lib/configResolver/environment');
+const { SSMParamterValueResolver } = require('../lib/configResolver/ssm');
+
 
 const LAMBDA_FAILURE_EXIT_CODE = 2;
 
@@ -51,9 +55,15 @@ const handleLambdaResponse = async (invokeCommandOutput) => {
 // --- CLI ---
 
 
-const readLocalConfigFromPath = (path) => {
+const readLocalConfigFromPath = async (path) => {
 
-    return JSON.parse(fs.readFileSync(path, 'utf8'));
+    const config = JSON.parse(fs.readFileSync(path, 'utf8'));
+    const environmentValueResolver = new EnvironmentValueResolver();
+    const ssmParamterValueResolver = new SSMParamterValueResolver();
+    const configResolver = new ConfigResolver([environmentValueResolver, ssmParamterValueResolver]);
+
+    const resolvedConfig = await configResolver.resolveConfig(config);
+    return resolvedConfig
 }
 
 const addCommonOptions = (command) => {
@@ -80,7 +90,7 @@ addCommonOptions(up)
         let resolvedConfig = configPath;
 
         if (readLocalConfig) {
-            const configObject = readLocalConfigFromPath(configPath)
+            const configObject = await readLocalConfigFromPath(configPath)
             if (!configObject || !configObject[env]) {
                 console.error(`Environment ${env} not found in  ${configPath}`)
             }
@@ -113,7 +123,7 @@ addCommonOptions(down)
 
         let resolvedConfig = configPath;
         if (readLocalConfig) {
-            const configObject = readLocalConfigFromPath(configPath)
+            const configObject = await readLocalConfigFromPath(configPath)
             if (!configObject || !configObject[env]) {
                 console.error(`Environment ${env} not found in  ${configPath}`)
             }
