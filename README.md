@@ -2,7 +2,17 @@
 Serverless wrapper for [node-db-migrate](https://github.com/db-migrate/node-db-migrate) framework
 
 ## Contents
-- [Quick Start](#quick-start)
+
+  * [What is this?](#what-is-this-)
+  * [Quick Start](#quick-start)
+    + [Deploying the AWS Lambda](#deploying-the-aws-lambda)
+    + [Using the CLI tool](#using-the-cli-tool)
+  * [ZIP Archive Structure](#zip-archive-structure)
+  * [Configuration](#configuration)
+  * [Examples](#examples)
+  * [Reference](#reference)
+    + [CLI](#cli)
+    + [Lambda payload](#lambda-payload)
 
 
 ## What is this?
@@ -12,18 +22,6 @@ Serverless wrapper for [node-db-migrate](https://github.com/db-migrate/node-db-m
 This repo contains the code for the AWS Lambda and a CLI tool to invoke this Lambda.
 The migrations are stored as a ZIP file in AWS S3 and the Lambda uses these to run the database migration commands
 
-### ZIP Archive Structure
-
-The ZIP file containing the migrations stored in S3 should have a folder named `migrations` at the root level and optionally, the configuration JSON can be included.
-
-Example:
-
-```bash
-$ zip -sf migrations.zip 
-Archive contains:
-  database.json
-  migrations/
-```
 
 ## Quick Start
 
@@ -49,16 +47,35 @@ npm run deploy
 
 ### Using the CLI tool
 
+1. Install the package
+```
+npm install git://github.com/senor-coder/sls-db-migrations.git#main
+```
+
+2. Run the CLI command
 ```bash
 sls-dbmigrate up --lambda <name or ARN>
    --bucket db-migrations
    --archive-path auth/migrations.zip 
    --config-path database.json --read-local-config prod
 ```
-Runs the migration of the files stored in the S3 bucket `db-migrations` in the path `auth/migrations.zip` using the environment `prod` 
+The above command runs the migration of the files stored in the S3 bucket `db-migrations` in the path `auth/migrations.zip` using the environment `prod` 
 using the config `database.json` from the local directory. `read-local-config` flag specifies to use the config from local system rather than the one 
 packaged in the ZIP file 
 
+
+## ZIP Archive Structure
+
+The ZIP file containing the migrations stored in S3 should have a folder named `migrations` at the root level and optionally, the configuration JSON can be included.
+
+Example:
+
+```bash
+$ zip -sf migrations.zip 
+Archive contains:
+  database.json
+  migrations/
+```
 
 ## Configuration
 
