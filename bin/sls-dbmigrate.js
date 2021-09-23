@@ -10,6 +10,7 @@ const { SSMClient } = require('@aws-sdk/client-ssm');
 
 
 const LAMBDA_FAILURE_EXIT_CODE = 2;
+const INVALID_CONFIG_REFERENCE_EXIT_CODE = 3;
 
 
 const constructMigrationPayload = (command, bucket, archivePath, config, env, countOrSpecification, scope) => {
@@ -88,21 +89,27 @@ const up = program.command('up')
 addCommonOptions(up)
 
     .action(async (env, countOrSpecification, options, command) => {
-        console.log({ options })
         const { bucket, archivePath, configPath, lambda, readLocalConfig } = options;
         let resolvedConfig = configPath;
 
         if (readLocalConfig) {
-            const configObject = await readLocalConfigFromPath(configPath)
-            if (!configObject || !configObject[env]) {
-                console.error(`Environment ${env} not found in  ${configPath}`)
+            try {
+                console.log(`Reading config and resolving values...`)
+                const configObject = await readLocalConfigFromPath(configPath)                
+                if (!configObject || !configObject[env]) {
+                    throw Error(`Environment ${env} not found in config`)
+                }
+                resolvedConfig = configObject
+            } catch (error) {
+                console.log(error)
+                process.exitCode = INVALID_CONFIG_REFERENCE_EXIT_CODE
+                process.exit(INVALID_CONFIG_REFERENCE_EXIT_CODE)
             }
-            resolvedConfig = configObject
-
         }
         const payload = constructMigrationPayload("up", bucket, archivePath, resolvedConfig, env, countOrSpecification)
 
         try {
+            console.log(`Invoking Lambda for "up" command with environment: ${env}...`)
             const invokeCommandOutput = await invokeLambda(lambda, payload)
             await handleLambdaResponse(invokeCommandOutput)
             console.log('Done.')
@@ -120,20 +127,27 @@ const down = program.command('down')
 addCommonOptions(down)
 
     .action(async (env, countOrSpecification, options, command) => {
-        console.log({ options })
         const { bucket, archivePath, configPath, lambda, readLocalConfig } = options;
 
 
         let resolvedConfig = configPath;
         if (readLocalConfig) {
-            const configObject = await readLocalConfigFromPath(configPath)
-            if (!configObject || !configObject[env]) {
-                console.error(`Environment ${env} not found in  ${configPath}`)
+            try {
+                console.log(`Reading config and resolving values...`)
+                const configObject = await readLocalConfigFromPath(configPath)                
+                if (!configObject || !configObject[env]) {
+                    throw Error(`Environment ${env} not found in config`)
+                }
+                resolvedConfig = configObject
+            } catch (error) {
+                console.log(error)
+                process.exitCode = INVALID_CONFIG_REFERENCE_EXIT_CODE
+                process.exit(INVALID_CONFIG_REFERENCE_EXIT_CODE)
             }
-            resolvedConfig = configObject
         }
         const payload = constructMigrationPayload("down", bucket, archivePath, resolvedConfig, env, countOrSpecification)
         try {
+            console.log(`Invoking Lambda for "down" command with environment: ${env}...`)
             const invokeCommandOutput = await invokeLambda(lambda, payload)
             await handleLambdaResponse(invokeCommandOutput)
             console.log('Done.')
