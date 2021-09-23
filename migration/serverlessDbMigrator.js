@@ -66,7 +66,15 @@ class ServerlessDBMigrator {
         console.log(`Downloaded File to: ${downloadedFile}`);
 
         console.log(`Extracting zip File to: ${targetDir}`);
-        await this.extractArchive(downloadedFile, targetDir);
+        try {
+            await this.extractArchive(downloadedFile, targetDir);
+        } catch (error) {
+            // Reading ZIP files fails occasionally, with errors like "Bad Archive", "Archive read error" etc
+            // This sleep "hack" seems to solve that
+            console.log(`There was an error (${error}) in extracting the zip, retrying extract again`);
+            await new Promise((resolve) => {setTimeout(resolve, 2000);})
+            await this.extractArchive(downloadedFile, targetDir);
+        }
         console.log(`Zip file extracted.`);
 
         await this.baseDbMigrationClient.createDB(targetDir, configOptions);
