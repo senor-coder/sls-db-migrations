@@ -5,7 +5,7 @@ const { LambdaClient, InvokeCommand, InvokeCommandInput } = require('@aws-sdk/cl
 const fs = require('fs');
 const ConfigResolver = require('../lib/configResolver');
 const { EnvironmentValueResolver } = require('../lib/configResolver/environment');
-const { SSMParamterValueResolver } = require('../lib/configResolver/ssm');
+const { SSMParameterValueResolver } = require('../lib/configResolver/ssm');
 const { SSMClient } = require('@aws-sdk/client-ssm');
 
 
@@ -62,8 +62,8 @@ const readLocalConfigFromPath = async (path) => {
     const environmentValueResolver = new EnvironmentValueResolver();
 
     const ssmClient = new SSMClient();
-    const ssmParamterValueResolver = new SSMParamterValueResolver(ssmClient);
-    const configResolver = new ConfigResolver([environmentValueResolver, ssmParamterValueResolver]);
+    const ssmParameterValueResolver = new SSMParameterValueResolver(ssmClient);
+    const configResolver = new ConfigResolver([environmentValueResolver, ssmParameterValueResolver]);
 
     const resolvedConfig = await configResolver.resolveConfig(config);
     return resolvedConfig

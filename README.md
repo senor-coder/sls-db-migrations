@@ -84,7 +84,7 @@ The configuration reference for node-db-migrate package can be found [here](http
 The configuration is extended to resolve values stored in the AWS SSM Parameter store and environment variables instead of storing them in the config file.
 The values are resolved by using the CLI when `read-local-config` option
 
-Currently the values can referenced by environment variables or from SSM Paramter store.
+Currently the values can referenced by environment variables or from SSM Parameter store.
 
 In the following example,
  -  `user` and `password` will be resolved 
