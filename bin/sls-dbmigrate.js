@@ -6,6 +6,7 @@ const fs = require('fs');
 const ConfigResolver = require('../lib/configResolver');
 const { EnvironmentValueResolver } = require('../lib/configResolver/environment');
 const { SSMParamterValueResolver } = require('../lib/configResolver/ssm');
+const { SSMClient } = require('@aws-sdk/client-ssm');
 
 
 const LAMBDA_FAILURE_EXIT_CODE = 2;
@@ -59,7 +60,9 @@ const readLocalConfigFromPath = async (path) => {
 
     const config = JSON.parse(fs.readFileSync(path, 'utf8'));
     const environmentValueResolver = new EnvironmentValueResolver();
-    const ssmParamterValueResolver = new SSMParamterValueResolver();
+
+    const ssmClient = new SSMClient();
+    const ssmParamterValueResolver = new SSMParamterValueResolver(ssmClient);
     const configResolver = new ConfigResolver([environmentValueResolver, ssmParamterValueResolver]);
 
     const resolvedConfig = await configResolver.resolveConfig(config);
