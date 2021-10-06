@@ -24,8 +24,8 @@ const constructMigrationPayload = (command, bucket, archivePath, config, env, co
 
 }
 
-const invokeLambda = async (lambdaNameOrArn, payload) => {
-    const lambdaClient = new LambdaClient();
+const invokeLambda = async (lambdaNameOrArn, region, payload) => {
+    const lambdaClient = new LambdaClient({ region: region });
     return lambdaClient.send(new InvokeCommand(
         {
             FunctionName: lambdaNameOrArn,
@@ -57,12 +57,12 @@ const handleLambdaResponse = async (invokeCommandOutput) => {
 // --- CLI ---
 
 
-const readLocalConfigFromPath = async (path) => {
+const readLocalConfigFromPath = async (path, awsRegion) => {
 
     const config = JSON.parse(fs.readFileSync(path, 'utf8'));
     const environmentValueResolver = new EnvironmentValueResolver();
 
-    const ssmClient = new SSMClient();
+    const ssmClient = new SSMClient({ region: awsRegion });
     const ssmParameterValueResolver = new SSMParameterValueResolver(ssmClient);
     const configResolver = new ConfigResolver([environmentValueResolver, ssmParameterValueResolver]);
 
@@ -72,6 +72,7 @@ const readLocalConfigFromPath = async (path) => {
 
 const addCommonOptions = (command) => {
     return command.requiredOption('-l --lambda <arn or name>', 'the arn or name of the lambda')
+        .option('-r --region <aws region>', 'the region where the AWS related requests will be sent to. Used in all CLI\'s interactions with AWS')
         .requiredOption('--bucket <bucket name>', 'the S3 bucket where migrations are stored')
         .requiredOption('--archive-path <path/to/migrate.zip>', 'the file path inside the bucket to the migration archive')
         .option('--config-path <path/to/database.json>', 'the file path inside the migration archive or in the local system')
@@ -89,13 +90,13 @@ const up = program.command('up')
 addCommonOptions(up)
 
     .action(async (env, countOrSpecification, options, command) => {
-        const { bucket, archivePath, configPath, lambda, readLocalConfig } = options;
+        const { bucket, archivePath, configPath, lambda, readLocalConfig, region } = options;
         let resolvedConfig = configPath;
 
         if (readLocalConfig) {
             try {
                 console.log(`Reading config and resolving values...`)
-                const configObject = await readLocalConfigFromPath(configPath)                
+                const configObject = await readLocalConfigFromPath(configPath, region)
                 if (!configObject || !configObject[env]) {
                     throw Error(`Environment ${env} not found in config`)
                 }
@@ -110,7 +111,7 @@ addCommonOptions(up)
 
         try {
             console.log(`Invoking Lambda for "up" command with environment: ${env}...`)
-            const invokeCommandOutput = await invokeLambda(lambda, payload)
+            const invokeCommandOutput = await invokeLambda(lambda, region, payload)
             await handleLambdaResponse(invokeCommandOutput)
             console.log('Done.')
         } catch (e) {
@@ -127,14 +128,14 @@ const down = program.command('down')
 addCommonOptions(down)
 
     .action(async (env, countOrSpecification, options, command) => {
-        const { bucket, archivePath, configPath, lambda, readLocalConfig } = options;
+        const { bucket, archivePath, configPath, lambda, readLocalConfig, region } = options;
 
 
         let resolvedConfig = configPath;
         if (readLocalConfig) {
             try {
                 console.log(`Reading config and resolving values...`)
-                const configObject = await readLocalConfigFromPath(configPath)                
+                const configObject = await readLocalConfigFromPath(configPath, region)
                 if (!configObject || !configObject[env]) {
                     throw Error(`Environment ${env} not found in config`)
                 }
@@ -148,7 +149,7 @@ addCommonOptions(down)
         const payload = constructMigrationPayload("down", bucket, archivePath, resolvedConfig, env, countOrSpecification)
         try {
             console.log(`Invoking Lambda for "down" command with environment: ${env}...`)
-            const invokeCommandOutput = await invokeLambda(lambda, payload)
+            const invokeCommandOutput = await invokeLambda(lambda, region, payload)
             await handleLambdaResponse(invokeCommandOutput)
             console.log('Done.')
         } catch (error) {
