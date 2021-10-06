@@ -81,7 +81,7 @@ const addCommonOptions = (command) => {
 }
 
 const program = new Command();
-program.version('0.0.1')
+program.version('0.1.1')
 
 const up = program.command('up')
     .argument('<env>', 'the environment to use based on the config file in the specified archive')
